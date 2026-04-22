@@ -130,6 +130,15 @@ body{font-family:var(--fb);background:var(--bg);color:var(--ink);min-height:100v
 .add-upd-btn{font-size:12px;font-weight:500;color:var(--sage);background:var(--sage-l);border:1px solid var(--sage-m);border-radius:8px;padding:5px 12px;cursor:pointer;font-family:var(--fb);margin-top:4px}
 .add-upd-btn:hover{background:var(--sage);color:#fff}
 .my-badge{font-size:10px;font-weight:600;color:var(--rose);background:var(--rose-l);padding:2px 8px;border-radius:8px}
+.post-menu{position:relative;margin-left:auto}
+.post-menu-btn{background:none;border:none;font-size:18px;color:var(--hint);cursor:pointer;padding:0 4px;line-height:1;font-family:var(--fb);transition:color .15s}
+.post-menu-btn:hover{color:var(--ink)}
+.post-menu-dropdown{position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:100;display:none}
+.post-menu-dropdown.open{display:block}
+.pmd-item{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;color:var(--ink);cursor:pointer;transition:background .15s;border:none;background:none;width:100%;text-align:left;font-family:var(--fb)}
+.pmd-item:hover{background:var(--bg)}
+.pmd-item.delete{color:var(--rose)}
+.pmd-item.delete:hover{background:var(--rose-l)}
 .mp-insight{font-family:var(--fd);font-style:italic;font-size:15px;color:var(--ink);line-height:1.55;margin-bottom:10px;padding:12px 16px;background:var(--gold-l);border-radius:8px}
 .mp-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--teal);background:var(--teal-l);border:1px solid var(--teal-m);border-radius:8px;padding:6px 14px;cursor:pointer;text-decoration:none;margin-bottom:10px}
 .mp-link:hover{background:var(--teal);color:#fff}
@@ -1318,11 +1327,22 @@ function renderPostHTML(p){
   const insight=p.insight?`<div class="mp-insight">"${p.insight}"</div>`:'';
   const link=p.link?`<a class="mp-link" href="${p.link.url}" target="_blank">🔗 ${p.link.label}</a>${p.linkDesc?`<div style="font-size:12.5px;color:var(--hint);margin-bottom:10px">${p.linkDesc}</div>`:''}`:'';
   let updates='';
-  if(isGrow&&p.updates&&p.updates.length){updates=`<div class="grow-updates"><div class="gu-label">Journey updates · ${p.updates.length} so far</div>${p.updates.map(u=>`<div class="gu-item"><div class="gu-dot"></div><div><div class="gu-date">${u.date}</div><div class="gu-text">${u.text}</div></div></div>`).join('')}${p.isMe?`<button class="add-upd-btn" onclick="addUpdate(${p.id})">+ Add update</button>`:''}</div>`;}
+  if(isGrow&&p.updates&&p.updates.length){updates=`<div class="grow-updates"><div class="gu-label">Journey updates · ${p.updates.length} so far</div>${p.updates.map((u,ui)=>`<div class="gu-item"><div class="gu-dot"></div><div style="flex:1"><div class="gu-date">${u.date}</div><div class="gu-text">${u.text}</div></div>${p.isMe?`<button onclick="deleteUpdate(${p.id},${ui})" style="background:none;border:none;font-size:11px;color:var(--hint);cursor:pointer;padding:0 4px;flex-shrink:0" title="Delete update">✕</button>`:''}</div>`).join('')}${p.isMe?`<button class="add-upd-btn" onclick="addUpdate(${p.id})">+ Add update</button>`:''}</div>`;}
   else if(isGrow&&p.isMe)updates=`<div class="grow-updates"><button class="add-upd-btn" onclick="addUpdate(${p.id})">+ Add update</button></div>`;
+  // Three-dot menu — only on posts you authored
+  const menu=p.isMe?`<div class="post-menu" onclick="event.stopPropagation()">
+    <button class="post-menu-btn" onclick="togglePostMenu(${p.id},this)" title="Options">···</button>
+    <div class="post-menu-dropdown" id="pm-${p.id}">
+      <button class="pmd-item" onclick="editPost(${p.id})">✏️  Edit post</button>
+      <button class="pmd-item delete" onclick="deletePost(${p.id})">🗑  Delete post</button>
+    </div>
+  </div>`:'';
   const myBadge=p.isMe?`<span class="my-badge">My post</span>`:'';
   return`<div class="post ${border}" data-id="${p.id}">
-    <div class="phd"><div class="pwho"><div class="av ${p.av}" onclick="openProfile('${p.author}')">${p.init}</div><div><div class="pname" onclick="openProfile('${p.author}')">${p.author}<span class="ptag ${t.cls}">${t.lbl}</span></div><div class="psub">${p.role}</div></div></div><div style="display:flex;align-items:center;gap:8px">${myBadge}<span class="ptime">${p.time}</span></div></div>
+    <div class="phd">
+      <div class="pwho"><div class="av ${p.av}" onclick="openProfile('${p.author}')">${p.init}</div><div><div class="pname" onclick="openProfile('${p.author}')">${p.author}<span class="ptag ${t.cls}">${t.lbl}</span></div><div class="psub">${p.role}</div></div></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto">${myBadge}<span class="ptime">${p.time}</span>${menu}</div>
+    </div>
     <div class="ptitle">${p.title}</div>${tagged}${insight}${body}${bullets}${fields}${link}${updates}
     <div class="pft">
       <button class="pact${isL?' liked':''}" onclick="toggleLike(${p.id},this)">♥ ${p.likes+(isL?1:0)}</button>
@@ -1352,6 +1372,122 @@ function renderGrowFeed(filter){
 }
 function toggleLike(id,btn){const p=posts.find(p=>p.id===id);if(!p)return;if(liked.has(id)){liked.delete(id);btn.classList.remove('liked');btn.textContent='♥ '+p.likes;}else{liked.add(id);btn.classList.add('liked');btn.textContent='♥ '+(p.likes+1);}}
 function toggleFollow(id,btn){const p=posts.find(p=>p.id===id);if(!p)return;if(followedJourneys.has(id)){followedJourneys.delete(id);btn.classList.remove('following');btn.textContent='👥 Follow journey';}else{followedJourneys.add(id);btn.classList.add('following');btn.textContent='👥 Following ✓';toast('Following — you\'ll be notified when '+p.author.split(' ')[0]+' adds an update ✓');}renderFollowPanel();}
+
+// Close all open post menus when clicking elsewhere
+document.addEventListener('click',()=>{document.querySelectorAll('.post-menu-dropdown.open').forEach(d=>d.classList.remove('open'));});
+
+function togglePostMenu(id,btn){
+  event.stopPropagation();
+  const dd=document.getElementById('pm-'+id);
+  const wasOpen=dd.classList.contains('open');
+  document.querySelectorAll('.post-menu-dropdown.open').forEach(d=>d.classList.remove('open'));
+  if(!wasOpen)dd.classList.add('open');
+}
+
+function deletePost(id){
+  if(!confirm('Delete this post? This cannot be undone.'))return;
+  const idx=posts.findIndex(p=>p.id===id);
+  if(idx===-1)return;
+  posts.splice(idx,1);
+  renderHomeFeed(currentFilter);
+  renderTypeFeed('feed-grow','grow');
+  renderTypeFeed('feed-share','share');
+  renderTypeFeed('feed-ask','ask');
+  renderTypeFeed('feed-discover','discover');
+  renderPanel();updateCounts();
+  toast('Post deleted');
+}
+
+function deleteUpdate(postId,updateIdx){
+  const p=posts.find(p=>p.id===postId);if(!p||!p.updates)return;
+  if(!confirm('Delete this update?'))return;
+  p.updates.splice(updateIdx,1);
+  renderHomeFeed(currentFilter);renderGrowFeed(currentGrowFilter);
+  toast('Update deleted');
+}
+
+let editingPostId=null;
+
+function editPost(id){
+  const p=posts.find(p=>p.id===id);if(!p)return;
+  editingPostId=id;
+  // Close any open menus
+  document.querySelectorAll('.post-menu-dropdown.open').forEach(d=>d.classList.remove('open'));
+  // Open modal pre-filled
+  selTypeVal=p.type==='grow-pro'||p.type==='grow-per'?'grow':p.type;
+  if(p.type==='grow-pro')growSubtype='pro';
+  if(p.type==='grow-per')growSubtype='per';
+  document.getElementById('modalH2').textContent='Edit post';
+  document.getElementById('modalSub').textContent='Update your post — changes go live immediately.';
+  document.getElementById('mwrap').classList.add('open');
+  document.getElementById('mentorTOpt').style.display=p.isMentor?'':'none';
+  document.getElementById('speakerTOpt').style.display=p.isSpeaker?'':'none';
+  // Select the right type tab
+  document.querySelectorAll('.topt').forEach(o=>o.classList.toggle('sel',o.dataset.type===selTypeVal));
+  updateDynFields();
+  // Pre-fill title
+  const titleEl=document.getElementById('postTitle');
+  if(titleEl)titleEl.value=p.title||'';
+  // Pre-fill dynamic fields after a tick so DOM is ready
+  setTimeout(()=>prefillFields(p),50);
+  // Change submit button to Save
+  document.getElementById('postSubmitBtn').textContent='Save changes →';
+  document.getElementById('postSubmitBtn').onclick=saveEdit;
+}
+
+function prefillFields(p){
+  // Body / insight
+  const textareas=document.querySelectorAll('#dynFields textarea');
+  const inputs=document.querySelectorAll('#dynFields input[type="text"]');
+  if(p.body){const t=document.querySelector('#dynFields textarea');if(t)t.value=p.body;}
+  if(p.insight){const t=document.querySelector('#dynFields textarea');if(t)t.value=p.insight;}
+  // Structured fields
+  if(p.fields&&p.fields.length){
+    const allT=document.querySelectorAll('#dynFields textarea');
+    const allI=document.querySelectorAll('#dynFields input[type="text"]');
+    p.fields.forEach((f,i)=>{
+      if(allT[i])allT[i].value=f.val;
+    });
+  }
+  // Grow subtype buttons
+  if(p.type==='grow-pro'){const el=document.getElementById('gt-pro');if(el){el.className='gt-opt sel-pro';document.getElementById('gt-per').className='gt-opt';}}
+  if(p.type==='grow-per'){const el=document.getElementById('gt-per');if(el){el.className='gt-opt sel-per';document.getElementById('gt-pro').className='gt-opt';}}
+  // Tags
+  if(p.tagged){selectedTags=[...p.tagged];const ts=document.getElementById('tagsSel');if(ts)ts.innerHTML=selectedTags.map(n=>`<span class="tchip">@${n}<span class="tchip-x" onclick="removeTag('${n}')">×</span></span>`).join('');}
+}
+
+function saveEdit(){
+  const p=posts.find(p=>p.id===editingPostId);if(!p)return;
+  const titleEl=document.getElementById('postTitle');
+  if(titleEl&&titleEl.value.trim())p.title=titleEl.value.trim();
+  // Collect body/insight from first textarea
+  const firstTA=document.querySelector('#dynFields textarea');
+  if(firstTA&&firstTA.value.trim()){
+    if(p.insight!==undefined)p.insight=firstTA.value.trim();
+    else p.body=firstTA.value.trim();
+  }
+  // Collect structured fields
+  if(p.fields){
+    const allT=document.querySelectorAll('#dynFields textarea');
+    p.fields.forEach((f,i)=>{if(allT[i]&&allT[i].value.trim())f.val=allT[i].value.trim();});
+  }
+  // Tags
+  if(selectedTags.length)p.tagged=[...selectedTags];
+  p.time='Edited · just now';
+  // Re-render everywhere
+  closeM();
+  editingPostId=null;
+  document.getElementById('postSubmitBtn').textContent=currentRole==='speaker'?'Submit for approval →':'Post to board →';
+  document.getElementById('postSubmitBtn').onclick=submitPost;
+  renderHomeFeed(currentFilter);
+  renderGrowFeed(currentGrowFilter);
+  renderTypeFeed('feed-share','share');
+  renderTypeFeed('feed-ask','ask');
+  renderTypeFeed('feed-discover','discover');
+  renderMentorFeed();
+  renderPanel();
+  toast('Post updated ✓');
+}
 function renderFollowPanel(){const el=document.getElementById('following-list');if(!el)return;const f=posts.filter(p=>followedJourneys.has(p.id));el.innerHTML=f.length?f.map(p=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="openProfile('${p.author}')"><div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px">${p.author.split(' ')[0]}: ${p.title.slice(0,36)}…</div><div style="font-size:11.5px;color:var(--hint)">${p.updates?p.updates.length+' updates':'No updates yet'}</div></div>`).join(''):`<div style="font-size:12.5px;color:var(--hint)">Follow a Grow thread to track it here</div>`;}
 function addUpdate(id){const p=posts.find(p=>p.id===id);if(!p)return;const text=prompt('Add an update to this thread:');if(!text||!text.trim())return;if(!p.updates)p.updates=[];p.updates.push({date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),text:text.trim()});renderHomeFeed(currentFilter);renderGrowFeed(currentGrowFilter);renderFollowPanel();toast('Update added ✓');}
 function updateCounts(){const n=posts.filter(p=>p.type==='ask').length;document.getElementById('askBadge').textContent=n;document.getElementById('askCount').textContent=n;}
@@ -1499,7 +1635,17 @@ function openModal(type){
   document.querySelectorAll('.topt').forEach(o=>o.classList.toggle('sel',o.dataset.type===selTypeVal));
   updateDynFields();
 }
-function closeM(){document.getElementById('mwrap').classList.remove('open');}
+function closeM(){
+  document.getElementById('mwrap').classList.remove('open');
+  // Reset if we were editing
+  if(editingPostId!==null){
+    editingPostId=null;
+    document.getElementById('modalH2').textContent=currentRole==='mentor'?'Share a mentor insight':currentRole==='speaker'?'Add a session note':'What do you want to share?';
+    document.getElementById('modalSub').textContent=currentRole==='speaker'?'Your post goes into the moderation queue and will be live once approved.':currentRole==='mentor'?'Your insight will be highlighted and sent as a WhatsApp notification.':'Choose a type — it sets the form fields so the board stays organised.';
+    document.getElementById('postSubmitBtn').textContent=currentRole==='speaker'?'Submit for approval →':'Post to board →';
+    document.getElementById('postSubmitBtn').onclick=submitPost;
+  }
+}
 function closeMOut(e){if(e.target.id==='mwrap')closeM();}
 function selT(el){document.querySelectorAll('.topt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');selTypeVal=el.dataset.type;updateDynFields();}
 function updateDynFields(){document.getElementById('dynFields').innerHTML=FTMPL[selTypeVal]||'';}

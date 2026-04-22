@@ -20,8 +20,8 @@ The ask is light: show up when you can, post when something is worth sharing, fi
 
 | Section | What goes here |
 |---|---|
-| 🌱 **Grow — Professional** | Career, skills, commercial challenges. What you're actively working on, where you're stuck, what's shifted. Template: what I'm working on / what I've tried / what I need. |
-| 🌸 **Grow — Personal** | Mindset, habits, life design, reading, anything outside work. Same template. Professional and personal are kept in separate streams so neither drowns the other. |
+| 🌱 **Grow (Professional)** | Career, skills, commercial challenges. What you're actively working on, where you're stuck, what's shifted. Template: what I'm working on / what I've tried / what I need. |
+| 🌸 **Grow (Personal)** | Mindset, habits, life design, reading, anything outside work. Same template. Professional and personal are kept in separate streams so neither drowns the other. |
 | ✨ **Share** | Wins, milestones, announcements. Promotions, deals, speaking slots, side projects, personal news. No win is too small. Resist the instinct to understate. |
 | 💬 **Ask** | Real questions with real context. The most valuable section long-term, it becomes a searchable archive of genuine advice from women who have been in the room. Post even if it feels dumb. |
 | 🔍 **Discover** | Books, podcasts, tools, events, resources worth passing on. Name what it is, say why you're sharing it, say who it's most useful for. |

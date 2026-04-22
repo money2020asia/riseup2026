@@ -404,9 +404,11 @@ body{font-family:var(--fb);background:var(--bg);color:var(--ink);min-height:100v
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
-<div id="gate" style="display:none;position:fixed;inset:0;background:#1A1714;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0">
-  <div style="text-align:center;padding:40px;max-width:380px;width:100%">
+<!-- GATE: step 1 password, step 2 name picker -->
+<div id="gate" style="display:none;position:fixed;inset:0;background:#1A1714;z-index:9999;align-items:center;justify-content:center">
+
+  <!-- STEP 1: PASSWORD -->
+  <div id="gateStep1" style="text-align:center;padding:40px;max-width:380px;width:100%">
     <div style="width:52px;height:52px;background:#C9627A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:#fff;font-style:italic;margin:0 auto 20px">R↑</div>
     <div style="font-family:'Playfair Display',Georgia,serif;font-size:24px;color:#fff;margin-bottom:6px">RiseUp Asia 2026</div>
     <div style="font-size:11px;font-weight:600;color:#C9627A;letter-spacing:.8px;text-transform:uppercase;margin-bottom:32px">Community Board</div>
@@ -420,6 +422,22 @@ body{font-family:var(--fb);background:var(--bg);color:var(--ink);min-height:100v
     <div id="gateErr" style="font-size:12.5px;color:#E88;margin-top:12px;display:none">Incorrect code — try again</div>
     <div style="font-size:12px;color:#555;margin-top:24px">Private to RiseUp Asia 2026 cohort members,<br>mentors, ambassadors, and approved speakers.</div>
   </div>
+
+  <!-- STEP 2: WHO ARE YOU -->
+  <div id="gateStep2" style="display:none;text-align:center;padding:32px 40px;max-width:680px;width:95%">
+    <div style="width:52px;height:52px;background:#C9627A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',Georgia,serif;font-size:22px;color:#fff;font-style:italic;margin:0 auto 16px">R↑</div>
+    <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;color:#fff;margin-bottom:5px">Welcome in.</div>
+    <div style="font-size:13px;color:#888;margin-bottom:22px">Select your name to personalise your board.</div>
+
+    <div id="nameGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;max-height:420px;overflow-y:auto;margin-bottom:16px;padding-right:4px;text-align:left"></div>
+
+    <div id="nameErr" style="font-size:12.5px;color:#E88;margin-bottom:12px;display:none">Please select your name first</div>
+    <button onclick="confirmName()"
+      style="width:100%;padding:12px;background:#C9627A;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">
+      Enter the board →
+    </button>
+  </div>
+
 </div>
 <div id="appShell" style="display:none">
 
@@ -434,11 +452,8 @@ body{font-family:var(--fb);background:var(--bg);color:var(--ink);min-height:100v
       <span id="pillLabel">Tessa — Cohort</span>
       <span class="rp-caret">▾</span>
       <div class="rdrop" id="rdrop">
-        <div class="rd-hd">Viewing as</div>
-        <div class="rdopt active" data-role="cohort" onclick="setRole('cohort',this)"><div class="rdav avr">TS</div><div><div class="rdname">Tessa Sim</div><div class="rdrole">Cohort · Clarity AI</div></div><span class="rdchk" id="chk-cohort">✓</span></div>
-        <div class="rdopt" data-role="mentor" onclick="setRole('mentor',this)"><div class="rdav avc">RS</div><div><div class="rdname">Rakhi Shrivastaua</div><div class="rdrole">Mentor · Standard Chartered</div></div><span class="rdchk" id="chk-mentor" style="display:none">✓</span></div>
-        <div class="rdopt" data-role="speaker" onclick="setRole('speaker',this)"><div class="rdav avt">SB</div><div><div class="rdname">SheueChee Beh</div><div class="rdrole">Speaker · Yuno</div></div><span class="rdchk" id="chk-speaker" style="display:none">✓</span></div>
-        <div class="rdopt" data-role="admin" onclick="setRole('admin',this)"><div class="rdav avg">TS</div><div><div class="rdname">Tessa (Admin view)</div><div class="rdrole">Board admin</div></div><span class="rdchk" id="chk-admin" style="display:none">✓</span></div>
+        <div class="rd-hd">Signed in as</div>
+        <div id="rdrop-me"></div>
       </div>
     </div>
     <div class="ibtn" onclick="toggleNotif()">🔔<div class="ndot on" id="ndot"></div></div>
@@ -739,27 +754,225 @@ body{font-family:var(--fb);background:var(--bg);color:var(--ink);min-height:100v
 </div><!-- /appShell -->
 
 <script>
-// ── PASSWORD GATE ─────────────────────────────────────────────────────────
+// ── GATE: ALL MEMBERS ────────────────────────────────────────────────────
+const ALL_MEMBERS=[
+  // Cohort
+  {name:"Zhu Yixin",          init:"ZY",av:"avl",role:"cohort",co:"Sumitomo Mitsui Banking"},
+  {name:"Nicole Li Wanning",  init:"NL",av:"avs",role:"cohort",co:"Thunes"},
+  {name:"Anastassiya Likhacheva",init:"AL",av:"avl",role:"cohort",co:"Tonik Bank"},
+  {name:"Tessa Sim",          init:"TS",av:"avr",role:"cohort",co:"Clarity AI",isAdmin:true},
+  {name:"Kewalin Sriwitchayangkul",init:"KS",av:"avg",role:"cohort",co:"Bangkok Bank"},
+  {name:"Rachel Wang",        init:"RW",av:"avs",role:"cohort",co:"Netflix"},
+  {name:"Vasemaca Justine Pikioune",init:"VP",av:"avc",role:"cohort",co:"Titan FX"},
+  {name:"Olga Kamyshova",     init:"OK",av:"avl",role:"cohort",co:"JPMorganChase"},
+  {name:"Xinyi Zhai",         init:"XZ",av:"avr",role:"cohort",co:"Ant International"},
+  {name:"Siramol Onsri",      init:"SO",av:"avc",role:"cohort",co:"AIRA Securities"},
+  {name:"Vidhi Harshad Shah", init:"VS",av:"avg",role:"cohort",co:"M-DAQ Global"},
+  {name:"Manli Zhang",        init:"MZ",av:"avs",role:"cohort",co:"Riskified"},
+  {name:"Jamuna Rajarathnam", init:"JR",av:"avl",role:"cohort",co:"dlocal"},
+  {name:"Lim Sing Jie",       init:"LSJ",av:"avr",role:"cohort",co:"Triple-A"},
+  {name:"Shiyin Chan",        init:"SC",av:"avs",role:"cohort",co:"Nextvestment"},
+  {name:"Peggy Chong",        init:"PC",av:"avg",role:"cohort",co:"Worldpay"},
+  {name:"Melissa Tatiana Santos",init:"MS",av:"avc",role:"cohort",co:"Tala Financing Philippines"},
+  // Ambassadors
+  {name:"Mary Ann Francis",   init:"MAF",av:"avg",role:"ambassador",co:"Global Payments & Strategic Initiatives"},
+  {name:"Truc Nguyen",        init:"TN",av:"avg",role:"ambassador",co:"Fintech Farm"},
+  // Mentors
+  {name:"Claire Barratt",     init:"CB",av:"avc",role:"mentor",co:"BCB Group"},
+  {name:"Dewang Neralla",     init:"DN",av:"avc",role:"mentor",co:"Hiwi Pay"},
+  {name:"Eelee Lua",          init:"EL",av:"avc",role:"mentor",co:"Xcube"},
+  {name:"Jeffrey Char",       init:"JC",av:"avc",role:"mentor",co:"J-seed"},
+  {name:"Julia Chin",         init:"JCh",av:"avc",role:"mentor",co:"JFourth Solutions"},
+  {name:"Karen Puskovitz",    init:"KP",av:"avc",role:"mentor",co:"Monnet Payments"},
+  {name:"Monica Millares",    init:"MM",av:"avc",role:"mentor",co:"BigPay"},
+  {name:"Rachel Whelan",      init:"RWh",av:"avc",role:"mentor",co:"Deutsche Bank"},
+  {name:"Rakhi Shrivastaua",  init:"RS",av:"avc",role:"mentor",co:"Standard Chartered"},
+  {name:"RenChang Soo",       init:"RC",av:"avc",role:"mentor",co:"Independent"},
+  {name:"Sally Sternecker",   init:"SS",av:"avc",role:"mentor",co:"EPAA"},
+  {name:"Sharada Patil",      init:"SP",av:"avc",role:"mentor",co:"Independent"},
+  {name:"Winnie Lau",         init:"WL",av:"avc",role:"mentor",co:"PayerMax"},
+  // Speakers
+  {name:"SheueChee Beh",      init:"SB",av:"avt",role:"speaker",co:"Yuno"},
+  {name:"Abhi Bisarya",       init:"AB",av:"avt",role:"speaker",co:"Independent"},
+  {name:"Fernn Lim",          init:"FL",av:"avt",role:"speaker",co:"Audax"},
+  {name:"Yier Cao",           init:"YC",av:"avt",role:"speaker",co:"Mimosa Ventures"},
+  {name:"Dr. Bijna Kotak Dasani",init:"BK",av:"avt",role:"speaker",co:"ArthAum Group"},
+  {name:"Sabrina Princessa Wang",init:"SW",av:"avt",role:"speaker",co:"Seraphina AI"},
+  {name:"Vladimira Artope",   init:"VA",av:"avt",role:"speaker",co:"EBANX"},
+  {name:"Lakshmi Rajogopalan",init:"LR",av:"avt",role:"speaker",co:"Thunes"},
+  {name:"Shobhit Mehra",      init:"SMh",av:"avt",role:"speaker",co:"BoxPay"},
+  {name:"Fatima Almubbad",    init:"FA",av:"avt",role:"speaker",co:"First Arc Capital"},
+  {name:"Dorothea Bozicolona-Volpe",init:"DB",av:"avt",role:"speaker",co:"Social Espionage"},
+  {name:"Violas Xiao",        init:"VX",av:"avt",role:"speaker",co:"XTransfer"},
+  {name:"Aditi Kohli",        init:"AK",av:"avt",role:"speaker",co:"Fireblocks"},
+  {name:"Judith Loh",         init:"JL",av:"avt",role:"speaker",co:"Nomupay"},
+  {name:"Marina Wasserman",   init:"MW",av:"avt",role:"speaker",co:"Bordeli"},
+  {name:"Mansi Chopra",       init:"MC",av:"avt",role:"speaker",co:"Finmo"},
+  {name:"Livia Ang",          init:"LA",av:"avt",role:"speaker",co:"NetEase Games"},
+  {name:"Jimmy Ong",          init:"JO",av:"avt",role:"speaker",co:"Nucleus Advisory"},
+  {name:"Crystal Bryant-Minter",init:"CB",av:"avt",role:"speaker",co:"Green Dot Corporation"},
+  {name:"Renata Caine",       init:"RC",av:"avt",role:"speaker",co:"Green Dot Corporation"},
+  {name:"Camilla Bullock",    init:"CBu",av:"avt",role:"speaker",co:"EPAA"},
+  {name:"Ranjani Rangan",     init:"RR",av:"avt",role:"speaker",co:"Changi Travel Services"},
+  {name:"Jay Kapur",          init:"JK",av:"avt",role:"speaker",co:"Nium"},
+  {name:"Stephen Slattery",   init:"SS",av:"avt",role:"speaker",co:"Money20/20"},
+];
+
+// Role label lookup
+const ROLE_LABELS={cohort:"Cohort 2026",ambassador:"Ambassador",mentor:"Mentor",speaker:"Speaker"};
+const ROLE_COLORS={cohort:"#C9627A",ambassador:"#B8963E",mentor:"#C96E50",speaker:"#2A7A8C"};
+
+let selectedMember=null;
+
+// ── GATE LOGIC ────────────────────────────────────────────────────────────
 (function(){
-  const PASS = 'asia2026';
-  const KEY  = 'ru26_auth';
-  const gate = document.getElementById('gate');
-  const app  = document.getElementById('appShell');
-  if(sessionStorage.getItem(KEY)==='1'){gate.style.display='none';app.style.display='block';}
-  else{gate.style.display='flex';app.style.display='none';}
+  const gate=document.getElementById('gate');
+  const app=document.getElementById('appShell');
+  const saved=sessionStorage.getItem('ru26_member');
+  if(saved){
+    const m=JSON.parse(saved);
+    gate.style.display='none';app.style.display='block';
+    selectedMember=m;
+    // board personalises after DATA is defined, triggered at bottom
+  } else {
+    gate.style.display='flex';app.style.display='none';
+  }
 })();
+
 function checkPass(){
-  const val = document.getElementById('gateInput').value.trim().toLowerCase();
+  const val=document.getElementById('gateInput').value.trim().toLowerCase();
   if(val==='asia2026'){
-    sessionStorage.setItem('ru26_auth','1');
-    document.getElementById('gate').style.display='none';
-    document.getElementById('appShell').style.display='block';
-    init();
+    document.getElementById('gateStep1').style.display='none';
+    document.getElementById('gateStep2').style.display='block';
+    buildNameGrid();
   } else {
     document.getElementById('gateErr').style.display='block';
     document.getElementById('gateInput').value='';
     document.getElementById('gateInput').focus();
   }
+}
+
+function buildNameGrid(){
+  const grid=document.getElementById('nameGrid');
+  // Group: cohort first, then ambassadors, then mentors, then speakers
+  const order=['cohort','ambassador','mentor','speaker'];
+  const grouped={};
+  order.forEach(r=>grouped[r]=[]);
+  ALL_MEMBERS.forEach(m=>{ if(grouped[m.role])grouped[m.role].push(m); });
+  let html='';
+  order.forEach(role=>{
+    if(!grouped[role].length)return;
+    html+=`<div style="grid-column:1/-1;font-size:10px;font-weight:600;color:#666;letter-spacing:.8px;text-transform:uppercase;padding:8px 0 4px;border-top:1px solid #2E2A27;margin-top:4px">${ROLE_LABELS[role]}s</div>`;
+    grouped[role].forEach(m=>{
+      html+=`<div class="name-card" id="nc-${m.init}" onclick="selectName('${m.name}')"
+        style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:1px solid #2E2A27;background:#2E2A27;cursor:pointer;transition:all .15s;text-align:left">
+        <div style="width:28px;height:28px;border-radius:50%;background:${ROLE_COLORS[m.role]}22;color:${ROLE_COLORS[m.role]};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${m.init}</div>
+        <div style="min-width:0">
+          <div style="font-size:12px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.name}</div>
+          <div style="font-size:10.5px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.co}</div>
+        </div>
+      </div>`;
+    });
+  });
+  grid.innerHTML=html;
+}
+
+function selectName(name){
+  // Clear previous selection
+  document.querySelectorAll('.name-card').forEach(c=>{
+    c.style.border='1px solid #2E2A27';
+    c.style.background='#2E2A27';
+  });
+  const m=ALL_MEMBERS.find(m=>m.name===name);
+  if(!m)return;
+  selectedMember=m;
+  const card=document.getElementById('nc-'+m.init);
+  if(card){
+    card.style.border=`1px solid ${ROLE_COLORS[m.role]}`;
+    card.style.background=`${ROLE_COLORS[m.role]}22`;
+  }
+  document.getElementById('nameErr').style.display='none';
+}
+
+function confirmName(){
+  if(!selectedMember){document.getElementById('nameErr').style.display='block';return;}
+  sessionStorage.setItem('ru26_member',JSON.stringify(selectedMember));
+  document.getElementById('gate').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  init();
+  personaliseBoard(selectedMember);
+}
+
+function personaliseBoard(m){
+  if(!m)return;
+  const isMentor=m.role==='mentor'||m.role==='ambassador';
+  const isSpeaker=m.role==='speaker';
+  const isAdmin=!!m.isAdmin;
+  let appRole='cohort';
+  if(isMentor)appRole='mentor';
+  if(isSpeaker)appRole='speaker';
+  if(isAdmin)appRole='admin';
+  currentRole=appRole;
+
+  // ── Build dynamic dropdown showing just the logged-in user ──
+  const rdropMe=document.getElementById('rdrop-me');
+  const roleColor={cohort:'avr',ambassador:'avg',mentor:'avc',speaker:'avt'}[m.role]||'avl';
+  const roleLabel=ROLE_LABELS[m.role]||m.role;
+  if(rdropMe){
+    rdropMe.innerHTML=`<div class="rdopt active" style="cursor:default">
+      <div class="rdav ${roleColor}">${m.init}</div>
+      <div><div class="rdname">${m.name}</div><div class="rdrole">${roleLabel} · ${m.co}</div></div>
+      <span style="color:var(--rose);font-size:14px">✓</span>
+    </div>
+    <div style="padding:8px 16px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--hint);margin-bottom:6px;font-weight:600;letter-spacing:.4px;text-transform:uppercase">Switch account</div>
+      <button onclick="signOut()" style="width:100%;padding:7px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;font-family:var(--fb);transition:all .15s" onmouseover="this.style.borderColor='var(--rose-m)';this.style.color='var(--rose)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Sign out →</button>
+    </div>`;
+  }
+
+  // ── Update topbar pill ──
+  const pillAv=document.getElementById('pillAv');
+  const pillLabel=document.getElementById('pillLabel');
+  if(pillAv){pillAv.className='rp-av '+roleColor;pillAv.textContent=m.init;}
+  if(pillLabel)pillLabel.textContent=m.name.split(' ')[0]+' — '+roleLabel;
+
+  // ── Patch PERSONAS with this person's actual name/details ──
+  const h=new Date().getHours();
+  const gPrefix=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+  const first=m.name.split(' ')[0];
+  PERSONAS.cohort.greeting=gPrefix+', '+first+' ✦';
+  PERSONAS.mentor.greeting='Welcome back, '+first+' ✦';
+  PERSONAS.speaker.greeting='Welcome, '+first+' ✦';
+  PERSONAS.admin.greeting='Admin view — '+first+' ✦';
+  PERSONAS.cohort.label=first+' — Cohort';
+  PERSONAS.mentor.label=first+' — Mentor';
+  PERSONAS.speaker.label=first+' — Speaker';
+  PERSONAS.admin.label=first+' — Admin';
+  PERSONAS.cohort.pillAv=PERSONAS.mentor.pillAv=PERSONAS.speaker.pillAv=PERSONAS.admin.pillAv=roleColor;
+  PERSONAS.cohort.pillTxt=PERSONAS.mentor.pillTxt=PERSONAS.speaker.pillTxt=PERSONAS.admin.pillTxt=m.init;
+
+  // ── Apply the right persona ──
+  applyPersona(PERSONAS[appRole]);
+
+  // ── Mark this person's posts as "mine" ──
+  posts.forEach(p=>{p.isMe=(p.author===m.name);});
+  renderHomeFeed('all');
+  renderPanel();
+
+  // ── Admin nav ──
+  const adminNav=document.getElementById('nav-admin');
+  if(adminNav)adminNav.style.display=isAdmin?'flex':'none';
+
+  // ── Greeting ──
+  const greetEl=document.getElementById('greeting');
+  if(greetEl)greetEl.textContent=gPrefix+', '+first+' ✦';
+
+  setTimeout(()=>toast('Welcome, '+first+' 👋'),400);
+}
+
+function signOut(){
+  sessionStorage.removeItem('ru26_member');
+  location.reload();
 }
 
 // ── DATA ─────────────────────────────────────────────────────────────────
@@ -956,9 +1169,9 @@ function applyPersona(p){
   const rb=document.getElementById('roleBannerHome');
   rb.innerHTML=p.banner?`<div class="role-banner ${p.banner.cls}"><div style="font-size:22px;flex-shrink:0">${p.banner.icon}</div><div><div class="rbn-title">${p.banner.title}</div><div class="rbn-desc">${p.banner.desc}</div></div></div>`:''  ;
   const mb=document.getElementById('mentor-role-banner');
-  if(mb)mb.innerHTML=currentRole==='mentor'?`<div class="role-banner rbn-mentor" style="margin-bottom:18px"><div style="font-size:20px;flex-shrink:0">📝</div><div><div class="rbn-title">Posting as Rakhi Shrivastaua</div><div class="rbn-desc">Your insight will be highlighted in gold and sent as a WhatsApp notification to all members.</div></div></div>`:'';
+  if(mb)mb.innerHTML=currentRole==='mentor'?`<div class="role-banner rbn-mentor" style="margin-bottom:18px"><div style="font-size:20px;flex-shrink:0">📝</div><div><div class="rbn-title">Posting as ${selectedMember?selectedMember.name:'Mentor'}</div><div class="rbn-desc">Your insight will be highlighted in gold and sent as a WhatsApp notification to all members.</div></div></div>`:'';
   const sb=document.getElementById('speaker-role-banner');
-  if(sb)sb.innerHTML=currentRole==='speaker'?`<div class="role-banner rbn-speaker" style="margin-bottom:18px"><div style="font-size:20px;flex-shrink:0">📝</div><div><div class="rbn-title">Posting as SheueChee Beh</div><div class="rbn-desc">Your post goes to the moderation queue and will be live once the board admin approves it — usually within 24 hours.</div></div></div>`:'';
+  if(sb)sb.innerHTML=currentRole==='speaker'?`<div class="role-banner rbn-speaker" style="margin-bottom:18px"><div style="font-size:20px;flex-shrink:0">📝</div><div><div class="rbn-title">Posting as ${selectedMember?selectedMember.name:'Speaker'}</div><div class="rbn-desc">Your post goes to the moderation queue and will be live once the board admin approves it — usually within 24 hours.</div></div></div>`:'';
   const hbh=document.getElementById('hostBannerHome');
   if(!p.showHost){hbh.innerHTML='';}else if(!hostConfirmed){renderHostBanner();}
   document.getElementById('panelQSec').style.display=p.showQ?'':'none';
@@ -992,7 +1205,7 @@ function showView(id,el){
   if(id==='sessions')renderSessions();
   if(id==='clusters')renderClusters();
   if(id==='directory')renderDirectory();
-  if(id==='profile-me')renderProfile('Tessa Sim',true);
+  if(id==='profile-me')renderProfile(selectedMember?selectedMember.name:'Tessa Sim',true);
   if(id==='admin')renderSpeakerAdminList();
   document.getElementById('npanel').classList.remove('open');
 }
@@ -1018,7 +1231,7 @@ function renderProfile(name,isMe){
   const totalLikes=myPosts.reduce((s,p)=>s+(p.likes||0),0);
   const roleLabel=member.role==='cohort'?'Cohort 2026':member.role==='mentor'?'Mentor':member.role==='ambassador'?'Ambassador':'Speaker';
   const roleBadgeClass=member.role==='cohort'?'rbc':member.role==='mentor'?'rbm':member.role==='ambassador'?'rba':'rbs';
-  const qCard=isMe||name==='Tessa Sim'?`
+  const qCard=isMe||name===(selectedMember?selectedMember.name:'Tessa Sim')?`
     <div class="q-card-view">
       <div class="qc-period">Q2 2026 — Apr → Jun</div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--hint);margin-bottom:4px"><span>Progress</span><span style="color:var(--sage);font-weight:500">3/5</span></div>
@@ -1293,7 +1506,9 @@ function updateDynFields(){document.getElementById('dynFields').innerHTML=FTMPL[
 function submitPost(){
   const title=document.getElementById('postTitle').value.trim();
   if(!title){toast('Please add a title ↑',true);return;}
-  const auth={cohort:{name:'Tessa Sim',role:'Commercial Lead APAC · Clarity AI',init:'TS',av:'avr',isMe:true},mentor:{name:'Rakhi Shrivastaua',role:'Director, Product Owner · Standard Chartered · Mentor',init:'RS',av:'avc'},speaker:{name:'SheueChee Beh',role:'Head of Partnerships · Yuno · Speaker',init:'SB',av:'avt'},admin:{name:'Tessa Sim',role:'Commercial Lead APAC · Clarity AI (Admin)',init:'TS',av:'avr',isMe:true}}[currentRole];
+  const m=selectedMember||{name:'Tessa Sim',role:'cohort',init:'TS',av:'avr',co:'Clarity AI',isAdmin:true};
+  const roleCoLabel={cohort:m.co,mentor:m.co+' · Mentor',ambassador:m.co+' · Ambassador',speaker:m.co+' · Speaker'}[m.role]||m.co;
+  const auth={name:m.name,role:roleCoLabel,init:m.init,av:m.av,isMe:true};
   const effectiveType=selTypeVal==='grow'?'grow-'+growSubtype:selTypeVal;
   if(currentRole==='speaker'){toast('Post submitted for moderation — will be live once approved ✓');closeM();document.getElementById('postTitle').value='';return;}
   posts.unshift({id:nextId++,type:effectiveType,...auth,title,body:'Just posted.',time:'Just now',likes:0,comments:0,isMentor:selTypeVal==='mentor',tagged:selectedTags.length?[...selectedTags]:undefined,updates:['grow-pro','grow-per'].includes(effectiveType)?[]:undefined,followers:0});
@@ -1305,9 +1520,16 @@ function submitPost(){
 }
 function toast(msg,err){const w=document.getElementById('toastWrap');const t=document.createElement('div');t.className='toast';if(err)t.style.background='var(--rose)';t.textContent=msg;w.appendChild(t);setTimeout(()=>t.remove(),3200);}
 
-// init() is called by the password gate once authenticated
-// If already authenticated (session), it fires immediately from the gate script above
-if(sessionStorage.getItem('ru26_auth')==='1'){init();}
+// On session restore: init then personalise
+const _saved=sessionStorage.getItem('ru26_member');
+if(_saved){
+  try{
+    const _m=JSON.parse(_saved);
+    selectedMember=_m;
+    init();
+    personaliseBoard(_m);
+  }catch(e){sessionStorage.removeItem('ru26_member');}
+}
 </script>
 </body>
 </html>

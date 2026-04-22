@@ -1,6 +1,6 @@
 # RiseUp Asia 2026 · Community Board
 
-> *How we show up for each other — all year.*
+> *How we show up for ourselves and each other – all year.*
 
 **Access:** Password-protected: asia2026
 
@@ -8,11 +8,11 @@
 
 ## Why this exists
 
-We have three days, a WhatsApp group, and each other's LinkedIn. This board is what we build on top of that — so the conversations that started in Bangkok have somewhere to live.
+We have three days, a WhatsApp group, and each other's LinkedIn. This board is what we can build on top of that so the conversations that started in Bangkok have somewhere to live.
 
-Not every mentor relationship will land the same way. Some of us are further along, some earlier. All of us have something to give and something to gain. The board makes that exchange possible without it dying in a group chat.
+Not every mentor relationship will land the same way. Some of us are further along, some earlier. All of us have something to give and something to gain. The board makes that exchange possible without it fizzling out in a group chat.
 
-The ask is light: show up when you can, post when something is worth sharing, fill in your goals once a quarter. That's it.
+The ask is light: show up when you can, post when something is worth sharing, fill in your goals once a quarter. A consolidate growth space.
 
 ---
 
@@ -30,7 +30,7 @@ The ask is light: show up when you can, post when something is worth sharing, fi
 
 ## How Grow threads work
 
-Grow is designed for development that takes time — not a single post, but a thread you come back to.
+Grow is designed for development that takes time. Not a single post, but a thread you can come back to.
 
 - **Tag people** — loop in cohort members, mentors, or anyone else you want following the thread. Tagged people are notified and can comment or follow the journey.
 - **Follow a journey** — any member can follow any Grow thread regardless of their role. Following means you get a notification whenever the poster adds an update. Your followed threads live in your profile under Following.
@@ -41,9 +41,9 @@ Grow is designed for development that takes time — not a single post, but a th
 
 ## Three rules. That's all.
 
-1. **Use the post form — not a blank text box.** Each section has structured fields. If you can't fill them in, the post needs more thought first. Structure is what makes the board searchable six months from now.
+1. **Use the post form, not a blank text box.** Each section has structured fields. If you can't fill them in, the post needs more thought first. Structure is what makes the board searchable six months from now.
 
-2. **Professional and personal Grow posts are separate streams.** If something sits in both, pick the dominant one.
+2. **Professional and Personal Grow posts are separate streams.** If something sits in both, pick the dominant one.
 
 3. **What goes on the board stays on the board.** Closed, password-protected, not indexed publicly. No screenshotting mentor insights or personal posts without asking first.
 
@@ -53,17 +53,15 @@ Grow is designed for development that takes time — not a single post, but a th
 
 ### Mentors & ambassadors
 
-You have full access to the board — read everything, post insights, share resources, answer open Asks, respond to quarterly goals.
+You have full access to the board. You can read everything, post insights, share resources, answer open Asks, respond to quarterly goals.
 
-Your posts are highlighted in gold across the feed and sent as WhatsApp notifications to all members. That visibility carries weight — use it with intention.
-
-One genuinely useful insight per quarter is more than enough. Quality over cadence, always.
+Your posts are highlighted in gold across the feed and sent as WhatsApp notifications to all members. That visibility carries weight intentionally.
 
 ### Speakers
 
-Speakers have tiered access — set individually by the board admin before the programme. Access can include posting session notes on their own talk, commenting on cohort posts, or react-only. Permissions can be updated at any time and automatically expire on the date set per speaker, after which access drops to read-only.
+Speakers have the same access as mentors — they can read everything, post session notes and insights, comment on cohort posts, and answer open Asks. Speaker posts are tagged in teal and surface in the Session Notes section alongside their talk.
 
-All speaker posts go through a moderation queue before going live. The board admin reviews and approves, declines, or requests edits within 24 hours.
+One exception applies: a small number of speakers may have restricted access at the board admin's discretion. This is managed quietly and without announcement.
 
 ---
 
@@ -75,7 +73,7 @@ Two things, done consistently, are worth more than ten things abandoned by May.
 
 At the start of each quarter, fill in your card: three professional goals, one personal goal, one thing you're giving to the group, one thing you need. Public to all members. Takes ten minutes.
 
-Quarters run: Jan–Mar · Apr–Jun · Jul–Sep · Oct–Dec. Cards are due in the first two weeks. If yours is missing, expect a gentle nudge.
+Quarters run: Jan–Mar · Apr–Jun · Jul–Sep · Oct–Dec. Cards are due in the first two weeks.
 
 ### 2. Monthly roundtable — first Thursday, every month
 
